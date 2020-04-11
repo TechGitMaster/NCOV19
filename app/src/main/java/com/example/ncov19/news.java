@@ -42,7 +42,6 @@ import java.util.List;
 public class news extends Fragment {
 
     private View viewAll;
-    private LinearLayout layout;
     private ProgressDialog progressDialog;
     private RequestQueue requestQueue;
     private LinearLayout newsLayout, linearLayoutParent;
@@ -55,15 +54,14 @@ public class news extends Fragment {
         viewAll = inflater.inflate(R.layout.fragment_news, container, false);
 
 
-        layout = viewAll.findViewById(R.id.newsLayout);
-        newsLayout = (LinearLayout)viewAll.findViewById(R.id.newsLayout);
+        newsLayout = viewAll.findViewById(R.id.newsLayout);
         dateLatest = viewAll.findViewById(R.id.dateLatest);
         linearLayoutParent = viewAll.findViewById(R.id.linearLayoutParent);
 
         booleanConditionToAll = false;
         stringListNews = new ArrayList<>();
         progressDialog = new ProgressDialog(getActivity());
-        requestQueue = Volley.newRequestQueue(getActivity());
+        requestQueue = Volley.newRequestQueue(getContext());
 
         new getDataClass().execute();
 
@@ -95,7 +93,6 @@ public class news extends Fragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            booleanConditionToAll = true;
             String newsData = "http://newsapi.org/v2/top-headlines?country=ph&apiKey=59ca12886bbb42e2ac3ccd332896c39d";
 
             JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.DEPRECATED_GET_OR_POST, newsData, null,
@@ -103,6 +100,7 @@ public class news extends Fragment {
                         @Override
                         public void onResponse(JSONObject response) {
                             stringListNews = new ArrayList<>();
+                            booleanConditionToAll = true;
                             try{
                                 JSONArray jsonArray = response.getJSONArray("articles");
 
@@ -162,8 +160,9 @@ public class news extends Fragment {
 
                                     if(numberCountArr+1 >= jsonArray.length()){
                                         dateLatest.setText("Date Update "+stringListNews.get(0).get(3));
-
-                                        news.this.loadNews();
+                                        for(int numberCountsss = 0;numberCountsss < 3;numberCountsss++) {
+                                            news.this.loadNews();
+                                        }
                                     }
                                 }
 
@@ -192,7 +191,7 @@ public class news extends Fragment {
             for (int numberCount = 0; numberCount < stringListNews.toArray().length; numberCount++) {
 
                 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 350);
-                CardView cardView = new CardView(getActivity());
+                CardView cardView = new CardView(getContext());
                 layoutParams.setMargins(5, 5, 5, 10);
                 cardView.setPadding(5, 5, 5, 5);
                 cardView.setContentDescription(String.valueOf(numberCount));
@@ -235,11 +234,6 @@ public class news extends Fragment {
                 cardView.addView(layout2);
                 newsLayout.addView(cardView);
                 Picasso.with(getContext()).load(stringListNews.get(numberCount).get(2)).error(R.drawable.noimageavailable).resize(350, 350).into(img);
-
-                if(numberCount+2 > stringListNews.toArray().length){
-                    progressDialog.dismiss();
-                    linearLayoutParent.setVisibility(View.VISIBLE);
-                }
             }
         }else{
             TextView txt = new TextView(getContext());
@@ -247,10 +241,10 @@ public class news extends Fragment {
             txt.setGravity(Gravity.CENTER);
             txt.setText("No news NCOV-19 for now");
             newsLayout.addView(txt);
-
-            progressDialog.dismiss();
-            linearLayoutParent.setVisibility(View.VISIBLE);
         }
+
+        progressDialog.dismiss();
+        linearLayoutParent.setVisibility(View.VISIBLE);
     }
 
 
